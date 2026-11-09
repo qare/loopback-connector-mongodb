@@ -35,6 +35,7 @@ describe('lazyConnect', function() {
       host: '127.0.0.1',
       port: 4,
       lazyConnect: false,
+      driverOptions: { serverSelectionTimeoutMS: 1000 },
     });
 
     ds.on('error', function(err) {
@@ -151,6 +152,7 @@ describe('mongodb connector', function() {
       var ds = getDataSource({
         host: 'localhost',
         port: 4, // unassigned by IANA
+        driverOptions: { serverSelectionTimeoutMS: 1000 },
       });
       ds.ping(function(err) {
         (!!err).should.be.true;
@@ -414,7 +416,7 @@ describe('mongodb connector', function() {
     });
     Post.create({ title: 'Post1', content: 'Post1 content' }, function(err, p1) {
       Post.find(function(err, results) {
-        events.should.eql(['before execute insert', 'after execute insert',
+        events.should.eql(['before execute insertOne', 'after execute insertOne',
           'before execute find', 'after execute find']);
         connector.clearObservers('before execute');
         connector.clearObservers('after execute');
@@ -616,9 +618,9 @@ describe('mongodb connector', function() {
 
           User.updateAll({ name: 'Al' }, { '$rename': { name: 'firstname' }}, function(err, updatedusers) {
             should.exist(err);
-            err.name.should.equal('MongoError');
-            err.errmsg.should.equal('The dollar ($) prefixed ' +
-              'field \'$rename\' in \'$rename\' is not valid for storage.');
+            err.name.should.equal('MongoServerError');
+            err.errmsg.should.match(
+              /^The dollar \(\$\) prefixed field '\$rename' in '\$rename' is not /);
             done();
           });
         });
@@ -632,9 +634,9 @@ describe('mongodb connector', function() {
 
           User.updateAll({ name: 'Al' }, { '$rename': { name: 'firstname' }}, function(err, updatedusers) {
             should.exist(err);
-            err.name.should.equal('MongoError');
-            err.errmsg.should.equal('The dollar ($) prefixed ' +
-              'field \'$rename\' in \'$rename\' is not valid for storage.');
+            err.name.should.equal('MongoServerError');
+            err.errmsg.should.match(
+              /^The dollar \(\$\) prefixed field '\$rename' in '\$rename' is not /);
             done();
           });
         });
@@ -668,9 +670,9 @@ describe('mongodb connector', function() {
 
           User.updateAll({ name: 'Al' }, { '$rename': { name: 'firstname' }}, options, function(err, updatedusers) {
             should.exist(err);
-            err.name.should.equal('MongoError');
-            err.errmsg.should.equal('The dollar ($) prefixed ' +
-              'field \'$rename\' in \'$rename\' is not valid for storage.');
+            err.name.should.equal('MongoServerError');
+            err.errmsg.should.match(
+              /^The dollar \(\$\) prefixed field '\$rename' in '\$rename' is not /);
             done();
           });
         });
